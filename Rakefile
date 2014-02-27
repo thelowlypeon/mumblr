@@ -9,7 +9,7 @@ task :console do
 end
 
 task :buildgem do
-  exec('gem build mumblr.gemspec && gem install ./mumblr-0.0.1.gem')
+  exec('gem build mumblr.gemspec && gem install ./mumblr-0.0.0.gem')
 end
 
 Rake::TestTask.new do |t|
