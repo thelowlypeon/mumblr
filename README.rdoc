@@ -1,0 +1,13 @@
+= Mumblr
+
+Mongo + Tumblr = Awesome. 
+
+Fetch any content you want from Tumblr, store it locally in MongoDB, and keep things up to date.
+
+== Author
+
+* Peter Compernolle -- http://github.com/thelowlypeon
+
+== Copyright
+
+Copyright (c) 2014- Peter Compernolle.
