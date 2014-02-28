@@ -1,5 +1,4 @@
 require 'rake/testtask'
-#gem build mumblr.gemspec && gem.install ./mumblr-VERSION.gem
 
 task :console do
   require 'irb'
@@ -11,6 +10,10 @@ end
 
 Rake::TestTask.new do |t|
   t.libs << 'test'
+end
+
+task :buildgem do
+  exec("gem build mumblr.gemspec && gem install mumblr")
 end
 
 desc "Run tests"
