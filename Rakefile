@@ -1,4 +1,5 @@
 require 'rake/testtask'
+#gem build mumblr.gemspec && gem.install ./mumblr-VERSION.gem
 
 task :console do
   require 'irb'
@@ -6,10 +7,6 @@ task :console do
   require 'mumblr'
   ARGV.clear
   IRB.start
-end
-
-task :buildgem do
-  exec('gem build mumblr.gemspec && gem install ./mumblr-0.0.0.gem')
 end
 
 Rake::TestTask.new do |t|

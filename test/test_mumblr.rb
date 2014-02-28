@@ -2,7 +2,6 @@ require 'test/unit'
 require 'mumblr'
 
 class MumblrTest < Test::Unit::TestCase
-
   def test_classes_defined
     assert defined?(Mumblr::Post), "Post not defined"
     assert defined?(Mumblr::TextPost), "TextPost not defined"
@@ -28,4 +27,10 @@ class MumblrTest < Test::Unit::TestCase
     assert_equal post.post_url, @url
   end
 
+  def test_mongo_save
+    assert_nothing_raised do 
+      post = Mumblr::Post.new(id: 1234)
+      #post.save
+    end
+  end
 end
