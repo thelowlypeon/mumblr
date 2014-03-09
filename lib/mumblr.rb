@@ -2,6 +2,7 @@ require 'tumblr_client'
 require 'mongo_mapper'
 require 'mumblr/config'
 require 'mumblr/post'
+Dir[File.dirname(__FILE__) + '/mumblr/models/*.rb'].each {|file| require file }
 
 module Mumblr
   class << self

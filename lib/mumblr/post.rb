@@ -80,14 +80,4 @@ module Mumblr
       Mumblr.const_get(classname)
     end
   end
-
-  class TextPost < Post
-    key :type, String, default: 'text'
-    key :title, String
-  end
-
-  class LinkPost < Post
-    key :type, String, default: 'link'
-    key :url, String
-  end
 end
