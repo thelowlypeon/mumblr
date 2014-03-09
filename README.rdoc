@@ -10,6 +10,10 @@ Add Mumblr to your Gemfile:
 
     gem 'mumblr', github: 'thelowlypeon/mumblr'
 
+Mumblr uses MongoMapper, which currently only supports Rails 4 in their beta. If you are using Mumblr in Rails 4, add this to your Gemfile:
+
+    gem 'mongo_mapper', '>= 0.13.0.beta2'
+
 == Configuration
 
 To use Mumblr, you must add configs for Tumblr and Mongo, as well as some optional Mumblr configs.
