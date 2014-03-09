@@ -7,6 +7,14 @@ module Mumblr
     key :post_url, String
     key :type, String, default: nil
 
+    def initialize(options)
+      if options.has_key?('id')
+        options['tumblr_id'] = options['id']
+        options.delete('id')
+      end
+      super
+    end
+
     def self.find(tumblr_id)
       options = {tumblr_id: tumblr_id}
       options['type'] = @type unless @type.blank?
@@ -24,7 +32,8 @@ module Mumblr
       if post.nil?
         hash = self.fetch_from_tumblr(tumblr_id)
         return nil if hash.blank?
-        post = self.class_from_type(@type.present? ? @type : hash['type']).new
+        post = self.class_from_type(@type.present? ? @type : hash['type']).new(hash)
+        post.save
       end
       post
     end
