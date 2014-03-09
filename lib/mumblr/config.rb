@@ -14,7 +14,7 @@ module Mumblr
   end
 
   class Configuration
-    attr_accessor :mongomapper, :tumblr
+    attr_accessor :mongomapper, :tumblr, :default_blog
 
     def tumblr=(options)
       unless [:consumer_key, :consumer_secret, :oauth_token, :oauth_token_secret].all? {|s| options.key? s}
@@ -27,6 +27,13 @@ module Mumblr
         config.oauth_token        = options[:oauth_token]
         config.oauth_token_secret = options[:oauth_token_secret]
       end
+
+      @tumblr = Tumblr::Client.new
+    end
+
+    def tumblr
+      raise RuntimeError, "Tumblr client not present. Please initialize Tumblr configs." if @tumblr.nil?
+      @tumblr
     end
 
     def mongomapper=(mongo_url)
