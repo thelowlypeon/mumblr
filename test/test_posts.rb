@@ -108,4 +108,16 @@ class MumblrTest < Test::Unit::TestCase
     textsearch = Mumblr::TextPost.find(67719574870)
     assert_not_nil textsearch
   end
+
+  def test_photoset_created_properly
+    Mumblr.blog = 'thelowlypeon'
+    photoset = Mumblr::PhotosetPost.find!(76743812654)
+    assert_not_nil photoset
+    assert_not_nil photoset.photos
+
+    set = Mumblr::Post.find(76743812654)
+    assert_not_nil set
+    assert_not_nil photoset.photos
+    assert_not_nil photoset.photos[0].alt_sizes[0]['url']
+  end
 end
