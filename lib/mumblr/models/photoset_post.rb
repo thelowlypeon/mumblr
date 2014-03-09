@@ -17,7 +17,7 @@ module Mumblr
   end
 
   class Photo
-    include MongoMapper::Document
+    include MongoMapper::EmbeddedDocument
 
     key :caption,       String
     key :alt_sizes,     Array #[{width, height, url},{...}]
