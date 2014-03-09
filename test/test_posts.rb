@@ -94,4 +94,18 @@ class MumblrTest < Test::Unit::TestCase
     post = Mumblr::Post.find!(67719574870)
     assert post.is_a?(Mumblr::TextPost), "fetched post is a #{post.class.name}, expected Mumblr::TextPost"
   end
+
+  def test_fetched_post_was_cached
+    Mumblr.blog = 'thelowlypeon'
+    presearch = Mumblr::Post.find(67719574870)
+    presearch.destroy unless presearch.nil?
+
+    post = Mumblr::Post.find!(67719574870)
+    assert_not_nil post
+
+    postsearch = Mumblr::Post.find(67719574870)
+    assert_not_nil postsearch
+    textsearch = Mumblr::TextPost.find(67719574870)
+    assert_not_nil textsearch
+  end
 end
