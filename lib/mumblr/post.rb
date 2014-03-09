@@ -7,6 +7,28 @@ module Mumblr
     key :post_url, String
     key :type, String, default: nil
 
+    def self.find(tumblr_id)
+      options = {tumblr_id: tumblr_id}
+      options['type'] = @type unless @type.blank?
+      self.where(tumblr_id: tumblr_id).first
+    end
+
+    def self.random(options={})
+      options['type'] = @type unless @type.blank?
+      collection = self.where(options)
+      collection.first(limit: 1, offset: rand(collection.count))
+    end
+
+    def self.find!(tumblr_id)
+      post = self.find(tumblr_id)
+      if post.nil?
+        hash = self.fetch_from_tumblr(tumblr_id)
+        return nil if hash.blank?
+        post = self.class_from_type(@type.present? ? @type : hash['type']).new
+      end
+      post
+    end
+
     # Fetch raw JSON data from tumblr. If parameter is
     #   an integer, returns a single hash, else returns
     #   an array of all records returned from Tumblr.
@@ -19,13 +41,13 @@ module Mumblr
     def self.fetch_from_tumblr(options={limit: 20})
       return_single = false
       if options.is_a?(Integer)
-        options = {:id => options}
+        options = {id: options, limit: 1}
         options['type'] = @type if @type.present?
         return_single = true
       end
       options['type'] = @type unless @type.blank?
       response = Mumblr.request_from_tumblr(options)
-      self.filter_tumblr_response(response, filter_by_blog: true, return_single: return_single)
+      self.filter_tumblr_response response, {filter_by_blog: true, return_single: return_single}
     end
 
     def self.filter_tumblr_response(response, options={})
@@ -35,13 +57,28 @@ module Mumblr
 
         posts = []
         response['posts'].each do |post|
-          posts << post if !filter_by_blog || post['blog_name'] == response['blog']['name']
+          posts << post unless filter_by_blog && post['blog_name'] != response['blog']['name']
         end
         return return_single ? posts.first : posts
       end
       raise Exception, "Invalid response from Tumblr"
     end
 
+    # For a given Tumblr post "type", return the class of the 
+    #  appropriate child of Post.
+    #
+    # new_object = Post.instance_from_type("link") # => LinkPost
+    # new_object = Post.instance_from_type("photo") # => PhotosetPost
+    def self.class_from_type(type)
+      if ['text', 'link', 'quote', 'chat', 'video'].include?(type)
+        classname = type.camelize + 'Post'
+      elsif type == 'photo'
+        classname = 'PhotosetPost'
+      else
+        raise ArgumentError, "Tying to construct a Tumblr post from unsupported type '#{type}'"
+      end
+      Mumblr.const_get(classname)
+    end
   end
 
   class TextPost < Post
