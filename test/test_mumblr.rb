@@ -49,16 +49,6 @@ class MumblrTest < Test::Unit::TestCase
     assert_equal post.post_url, @url
   end
 
-  def test_mongo_save
-    assert_nothing_raised do 
-      post = Mumblr::Post.new(id: 1234)
-      post.save
-    end
-    found = Mumblr::Post.find(1234)
-    assert_not_nil found
-    assert_equal found.id, 1234
-  end
-
   def test_blogname
     assert_not_nil Mumblr.blog
     assert_equal Mumblr.blog, @@default_blog
