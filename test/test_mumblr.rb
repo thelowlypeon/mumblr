@@ -2,6 +2,7 @@ require 'test/unit'
 require 'mumblr'
 
 class MumblrTest < Test::Unit::TestCase
+  @@default_blog = 'thelowlypeon'
   def setup
     Mumblr.configure do |config|
       config.mongomapper  = 'mongomapper://localhost:27017/test'
@@ -11,7 +12,7 @@ class MumblrTest < Test::Unit::TestCase
         oauth_token: "YOUR_OAUTH_TOKEN",
         oauth_token_secret: "YOUR_OATH_TOKEN_SECRET"
       }
-      config.default_blog = 'thelowlypeon'
+      config.default_blog = @@default_blog
     end
   end
 
@@ -59,9 +60,8 @@ class MumblrTest < Test::Unit::TestCase
   end
 
   def test_blogname
-    Mumblr.blog = 'thelowlypeon'
     assert_not_nil Mumblr.blog
-    assert_equal Mumblr.blog, 'thelowlypeon'
+    assert_equal Mumblr.blog, @@default_blog
   end
 
   def test_tumblr_client

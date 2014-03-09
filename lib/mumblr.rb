@@ -5,10 +5,14 @@ require 'mumblr/post'
 
 module Mumblr
   class << self
-    attr_accessor :blog
+    @blog
 
-    def self.blog
+    def blog
       @blog ||= @configuration.default_blog
+    end
+
+    def blog=(name)
+      @blog = name
     end
   end
 

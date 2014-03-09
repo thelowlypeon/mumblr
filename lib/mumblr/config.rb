@@ -42,5 +42,13 @@ module Mumblr
       ::MongoMapper.database = url.path.gsub(/^\//, '')
       ::MongoMapper.database.authenticate(url.user, url.password) if url.user && url.password
     end
+
+    def default_blog=(blog)
+      @default_blog = blog
+    end
+
+    def default_blog
+      @default_blog
+    end
   end
 end
