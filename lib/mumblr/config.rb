@@ -14,7 +14,7 @@ module Mumblr
   end
 
   class Configuration
-    attr_accessor :mongomapper, :tumblr, :default_blog
+    attr_accessor :mongomapper, :tumblr, :default_blog, :include_private
 
     def tumblr=(options)
       unless [:consumer_key, :consumer_secret, :oauth_token, :oauth_token_secret].all? {|s| options.key? s}
@@ -49,6 +49,14 @@ module Mumblr
 
     def default_blog
       @default_blog
+    end
+
+    def include_private=(include_private)
+      @include_private = include_private
+    end
+
+    def include_private
+      @include_private ||= false
     end
   end
 end

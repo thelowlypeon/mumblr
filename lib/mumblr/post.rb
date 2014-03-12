@@ -106,11 +106,13 @@ module Mumblr
 
         posts = []
         response['posts'].each do |post|
-          posts << post unless filter_by_blog && post['blog_name'] != Mumblr.blog
+          if (!filter_by_blog || post['blog_name'] == Mumblr.blog) && (Mumblr.configuration.include_private || post['state'] != 'private')
+            posts << post #unless filter_by_blog && post['blog_name'] != Mumblr.blog
+          end
         end
         return return_single ? posts.first : posts
       end
-      raise Exception, "Invalid response from Tumblr"
+      raise Exception, "Invalid response from Tumblr: " + response.to_json
     end
 
     # For a given Tumblr post "type", return the class of the 

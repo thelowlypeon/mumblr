@@ -22,14 +22,15 @@ For Rails, add the following to an initializer:
 
     Mumblr.configure do |config|
       #mongomapper://{username:password@}host:port/database
-      config.mongomapper  = "mongomapper://localhost:27017/#{Rails.env}"
-      config.tumblr       = {
+      config.mongomapper     = "mongomapper://localhost:27017/#{Rails.env}"
+      config.tumblr          = {
         consumer_key: "YOUR_CONSUMER_KEY",
         consumer_secret: "YOUR_CONSUMER_SECRET",
         oauth_token: "YOUR_OAUTH_TOKEN",
         oauth_token_secret: "YOUR_OATH_TOKEN_SECRET"
       }
-      config.default_blog = 'your_tumblr_blog_name' #optional
+      config.default_blog    = 'your_tumblr_blog_name' #optional
+      config.include_private = true #include private posts when fetching from tumblr (default false)
     end
 
 == Basic Usage

@@ -137,4 +137,17 @@ class MumblrTest < Test::Unit::TestCase
       assert post.tags.collect {|el| el.downcase }.include?('chicago'), "Post #{post.tumblr_id} is not tagged with chicago"
     end
   end
+
+  def test_fetch_private_post
+    assert_nothing_raised do
+      Mumblr.configuration.include_private = false
+      post = Mumblr::Post.fetch_find(79321092514)
+      assert_nil post
+
+      Mumblr.configuration.include_private = true
+      post = Mumblr::Post.fetch_find(79321092514)
+      assert_not_nil post
+      assert_equal post.state, 'private'
+    end
+  end
 end
