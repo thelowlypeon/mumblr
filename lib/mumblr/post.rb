@@ -49,7 +49,7 @@ module Mumblr
     # ALERT: when querying mongo, this should be "tags". tumblr is "tag"
     def self.tagged(tag)
       options = {tags: tag}
-      #options['type'] = @type unless @type.blank?
+      options['type'] = @type unless @type.blank?
       self.where(options)
     end
 
