@@ -18,6 +18,7 @@ class MumblrTest < Test::Unit::TestCase
 
   def teardown
     Mumblr::Post.delete_all
+    Mumblr.blog = @@default_blog
   end
 
   def test_saved_textpost_found_by_generic_search
@@ -119,5 +120,21 @@ class MumblrTest < Test::Unit::TestCase
     assert_not_nil set
     assert_not_nil photoset.photos
     assert_not_nil photoset.photos[0].alt_sizes[0]['url']
+  end
+
+  def test_query_by_tags
+    post = Mumblr::Post.find!(67719574870)
+    post.tags.each do |tag|
+      found = Mumblr::Post.tagged(tag).first
+      assert_not_nil found
+    end
+  end
+
+  def test_fetch_by_tag
+    posts = Mumblr::Post.tagged!('chicago')
+    assert_not_nil posts.first, "Posts is empty but should have one element"
+    posts.each do |post|
+      assert post.tags.collect {|el| el.downcase }.include?('chicago'), "Post #{post.tumblr_id} is not tagged with chicago"
+    end
   end
 end

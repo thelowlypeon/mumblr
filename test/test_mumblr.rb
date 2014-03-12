@@ -81,6 +81,7 @@ class MumblrTest < Test::Unit::TestCase
     response = Mumblr::Post.fetch_from_tumblr({limit: 1})
     assert response.present?
     assert_equal response.first['blog_name'], blogname
+    Mumblr.blog = @@default_blog
   end
 
   def test_filter_tumblr_response
