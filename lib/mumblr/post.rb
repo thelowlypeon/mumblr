@@ -6,7 +6,19 @@ module Mumblr
     key :blog_name, String
     key :post_url, String
     key :type, String, default: nil
+    key :timestamp, Integer
+    key :date, Date
+    key :format, String
+    key :reblog_key, String
     key :tags, Array
+    key :note_count, Integer
+    key :bookmarklet, Boolean, default: false
+    key :mobile, Boolean, default: false
+    key :source_url, String
+    key :source_title, String
+    key :liked, Boolean, default: nil
+    key :state, String
+    key :total_posts, Integer
 
     def initialize(options)
       if options.has_key?('id')
