@@ -26,7 +26,7 @@ class MumblrTest < Test::Unit::TestCase
       post = Mumblr::TextPost.new(tumblr_id: 1234)
       post.save
     end
-    found = Mumblr::Post.find(1234)
+    found = Mumblr::Post.find(1234, false)
     assert_not_nil found
     assert_equal found.tumblr_id, 1234
   end
@@ -35,12 +35,17 @@ class MumblrTest < Test::Unit::TestCase
     post = Mumblr::TextPost.new(tumblr_id: 1234)
     post.save
 
-    found = Mumblr::Post.find(1234)
+    found = Mumblr::Post.find(1234, false)
     assert_equal found.type, "text"
     assert found.is_a?(Mumblr::TextPost)
   end
 
   def test_absent_post_not_found
+    not_found = Mumblr::Post.find(1, false)
+    assert not_found.nil?
+  end
+
+  def test_absent_post_not_found_or_fetched
     not_found = Mumblr::Post.find(1)
     assert not_found.nil?
   end
@@ -92,38 +97,38 @@ class MumblrTest < Test::Unit::TestCase
 
   def test_fetched_post_has_valid_type
     Mumblr.blog = 'thelowlypeon'
-    post = Mumblr::Post.find!(67719574870)
+    post = Mumblr::Post.find(67719574870, true)
     assert post.is_a?(Mumblr::TextPost), "fetched post is a #{post.class.name}, expected Mumblr::TextPost"
   end
 
   def test_fetched_post_was_cached
     Mumblr.blog = 'thelowlypeon'
-    presearch = Mumblr::Post.find(67719574870)
+    presearch = Mumblr::Post.find(67719574870, false)
     presearch.destroy unless presearch.nil?
 
-    post = Mumblr::Post.find!(67719574870)
+    post = Mumblr::Post.find(67719574870, true)
     assert_not_nil post
 
-    postsearch = Mumblr::Post.find(67719574870)
+    postsearch = Mumblr::Post.find(67719574870, false)
     assert_not_nil postsearch
-    textsearch = Mumblr::TextPost.find(67719574870)
+    textsearch = Mumblr::TextPost.find(67719574870, false)
     assert_not_nil textsearch
   end
 
   def test_photoset_created_properly
     Mumblr.blog = 'thelowlypeon'
-    photoset = Mumblr::PhotosetPost.find!(76743812654)
+    photoset = Mumblr::PhotosetPost.find(76743812654, true)
     assert_not_nil photoset
     assert_not_nil photoset.photos
 
-    set = Mumblr::Post.find(76743812654)
+    set = Mumblr::Post.find(76743812654, false)
     assert_not_nil set
     assert_not_nil photoset.photos
     assert_not_nil photoset.photos[0].alt_sizes[0]['url']
   end
 
   def test_query_by_tags
-    post = Mumblr::Post.find!(67719574870)
+    post = Mumblr::Post.find(67719574870, true)
     post.tags.each do |tag|
       found = Mumblr::Post.tagged(tag).first
       assert_not_nil found
@@ -141,13 +146,27 @@ class MumblrTest < Test::Unit::TestCase
   def test_fetch_private_post
     assert_nothing_raised do
       Mumblr.configuration.include_private = false
-      post = Mumblr::Post.fetch_find(79321092514)
+      post = Mumblr::Post.find(79321092514, true)
       assert_nil post
 
       Mumblr.configuration.include_private = true
-      post = Mumblr::Post.fetch_find(79321092514)
+      post = Mumblr::Post.find(79321092514, true)
       assert_not_nil post
       assert_equal post.state, 'private'
+    end
+  end
+
+  def test_duplicates_caught_and_updated_instead_of_inserted
+    tumblr_id = 67719574870
+    found = Mumblr::Post.find(tumblr_id, true)
+    count_before = Mumblr::Post.where(tumblr_id: tumblr_id).count
+    unless found.nil?
+      assert_nothing_raised do
+        duplicate = Mumblr::Post.new({tumblr_id: tumblr_id, type: found.type})
+        duplicate.save
+        count_after = Mumblr::Post.where(tumblr_id: tumblr_id).count
+        assert_equal count_before, count_after
+      end
     end
   end
 end

@@ -19,6 +19,7 @@ module Mumblr
     key :liked, Boolean, default: nil
     key :state, String
     key :total_posts, Integer
+    timestamps!
 
     def initialize(options)
       if options.has_key?('id')
@@ -28,29 +29,29 @@ module Mumblr
       super
     end
 
-    def save
-      exists = self.class.where(tumblr_id: self.tumblr_id).first
-      unless exists.nil?
-        exists.destroy
+    def self.new(args)
+      if args.is_a?(Hash) && args.has_key?(:tumblr_id)
+        exists = self.where(tumblr_id: args[:tumblr_id]).first
+        unless exists.nil?
+          args.each do |k,v|
+            exists.send("#{k}=", "#{v}")
+          end
+          return exists
+        end
       end
       super
     end
 
-    def self.find(tumblr_id)
+    #retrieve post from mongo, fetch from tumblr if not found
+    def self.find(tumblr_id, fetch_if_not_found = true)
       options = {tumblr_id: tumblr_id}
       options['type'] = @type unless @type.blank?
-      self.where(options).first
+      post = self.where(options).first
+      post.nil? && fetch_if_not_found ? self.find!(tumblr_id) : post
     end
 
+    # fetch from tumblr. insert, or update if exists
     def self.find!(tumblr_id)
-      post = self.find(tumblr_id)
-      if post.nil?
-        post = self.fetch_find(tumblr_id)
-      end
-      post
-    end
-
-    def self.fetch_find(tumblr_id)
       hash = self.fetch_from_tumblr(tumblr_id)
       return nil if hash.blank?
       post = self.class_from_type(@type.present? ? @type : hash['type']).new(hash)
