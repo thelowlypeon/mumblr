@@ -33,6 +33,17 @@ For Rails, add the following to an initializer:
       config.include_private = true #include private posts when fetching from tumblr (default false)
     end
 
+=== Environment Variable
+
+Alternatively, you can configure Mumblr using environment variables:
+
+    TUMBLR_CONSUMER_KEY = yourtumblrapikey
+    TUMBLR_CONSUMER_SECRET = yourtumblrapisecret
+    TUMBLR_OAUTH_TOKEN = yourtumblroauthtoken
+    TUMBLR_OAUTH_TOKEN_SECRET = yourtumblroauthsecret
+    MONGOMAPPER_CONFIG = "mongomapper://localhost:27017/test"
+    MUMBLR_DEFAULT_BLOG = tumblrblog
+
 == Basic Usage
 
     Mumblr.blog = 'myotherblogname'
