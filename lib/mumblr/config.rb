@@ -16,22 +16,26 @@ module Mumblr
   class Configuration
     attr_accessor :mongomapper, :tumblr, :default_blog, :include_private
 
-    def tumblr=(options)
-      unless [:consumer_key, :consumer_secret, :oauth_token, :oauth_token_secret].all? {|s| options.key? s}
-        raise ArgumentError, "Tumblr config requires [:consumer_key, :consumer_secret, :oauth_token, :oauth_token_secret]"
-      end
+    def initialize(*args)
+      self.mongomapper = ENV['MONGOMAPPER_CONFIG'] #default mongo config
+      super
+    end
 
+    def tumblr=(options)
       Tumblr.configure do |config|
-        config.consumer_key       = options[:consumer_key]
-        config.consumer_secret    = options[:consumer_secret]
-        config.oauth_token        = options[:oauth_token]
-        config.oauth_token_secret = options[:oauth_token_secret]
+        config.consumer_key       = options[:consumer_key]       || ENV['TUMBLR_CONSUMER_KEY']
+        config.consumer_secret    = options[:consumer_secret]    || ENV['TUMBLR_CONSUMER_SECRET']
+        config.oauth_token        = options[:oauth_token]        || ENV['TUMBLR_OAUTH_TOKEN']
+        config.oauth_token_secret = options[:oauth_token_secret] || ENV['TUMBLR_OAUTH_TOKEN_SECRET']
       end
 
       @tumblr = Tumblr::Client.new
     end
 
     def tumblr
+      if @tumblr.nil?
+        self.tumblr = {}
+      end
       raise RuntimeError, "Tumblr client not present. Please initialize Tumblr configs." if @tumblr.nil?
       @tumblr
     end
@@ -48,7 +52,7 @@ module Mumblr
     end
 
     def default_blog
-      @default_blog
+      @default_blog || ENV['MUMBLR_DEFAULT_BLOG']
     end
 
     def include_private=(include_private)

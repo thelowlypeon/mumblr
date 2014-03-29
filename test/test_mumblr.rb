@@ -5,13 +5,6 @@ class MumblrTest < Test::Unit::TestCase
   @@default_blog = ENV['MUMBLR_DEFAULT_BLOG'] || 'thelowlypeon'
   def setup
     Mumblr.configure do |config|
-      config.mongomapper  = ENV['MONGOMAPPER_CONFIG']
-      config.tumblr       = {
-        consumer_key:       ENV['TUMBLR_CONSUMER_KEY'],
-        consumer_secret:    ENV['TUMBLR_CONSUMER_SECRET'],
-        oauth_token:        ENV['TUMBLR_OAUTH_TOKEN'],
-        oauth_token_secret: ENV['TUMBLR_OAUTH_TOKEN_SECRET']
-      }
       config.default_blog = @@default_blog
     end
   end
