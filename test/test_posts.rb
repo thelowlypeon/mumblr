@@ -165,7 +165,7 @@ class MumblrTest < Test::Unit::TestCase
         duplicate = Mumblr::Post.new({tumblr_id: tumblr_id, type: found.type})
         duplicate.save
         count_after = Mumblr::Post.where(tumblr_id: tumblr_id).count
-        assert_equal count_before, count_after
+        assert_equal count_before, count_after, "Count before #{count_before} != count after #{count_after}. found: #{found.to_json}"
       end
     end
   end
