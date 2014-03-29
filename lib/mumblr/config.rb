@@ -17,7 +17,7 @@ module Mumblr
     attr_accessor :mongomapper, :tumblr, :default_blog, :include_private
 
     def initialize(*args)
-      self.mongomapper = ENV['MONGOMAPPER_CONFIG'] #default mongo config
+      self.mongomapper = ENV['MONGOMAPPER_CONFIG'] if ENV.has_key?('MONGOMAPPER_CONFIG') #default mongo config
       super
     end
 
