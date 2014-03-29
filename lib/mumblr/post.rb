@@ -120,7 +120,7 @@ module Mumblr
 
       def self.filter_tumblr_response(response, options={})
         #puts response.to_json
-        unless response.nil? || response['posts'].blank?
+        unless response.nil? || !response.has_key?('posts')
           options = {fliter_by_blog: true, return_single: false}.merge(options)
           posts = []
           response['posts'].each do |post|
@@ -128,7 +128,7 @@ module Mumblr
               posts << post unless options[:filter_by_blog] && post['blog_name'] != Mumblr.blog
             end
           end
-          return options[:return_single] ? posts.first : posts
+          return options[:return_single] && posts.present? ? posts.first : posts
         end
         raise Exception, "Invalid response from Tumblr: " + response.to_json
       end

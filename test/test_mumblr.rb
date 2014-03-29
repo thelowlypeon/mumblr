@@ -80,7 +80,7 @@ class MumblrTest < Test::Unit::TestCase
   def test_filter_tumblr_response
     response = Mumblr.request_from_tumblr({id: 1}) #post 1 exists by a guy named david
     filtered = Mumblr::Post.filter_tumblr_response(response, filter_by_blog: true, return_single: true)
-    assert filtered.nil?, "Tumblr post #1 not filtered"
+    assert filtered.blank?, "Tumblr post #1 not filtered"
 
     unfiltered = Mumblr::Post.filter_tumblr_response(response, filter_by_blog: false, return_single: true)
     assert_not_nil unfiltered, "Post from other user was filtered"
