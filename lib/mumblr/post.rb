@@ -71,6 +71,9 @@ module Mumblr
     end
 
     # ALERT: when querying tumblr, this should be "tag". mongo is "tags"
+    # Note: Heed caution when assuming this returns something. Tumblr's API
+    #       will NOT return private posts when retrieved by tag, but WILL
+    #       when retrieved using .all
     def self.tagged!(tag, options={})
       self.all!(options.merge({tag: tag}))
     end

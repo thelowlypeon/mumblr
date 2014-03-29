@@ -56,6 +56,18 @@ Alternatively, you can configure Mumblr using environment variables:
       puts photoset.caption
     end
 
+== Querying by Tag
+
+Easily query by tag:
+
+    @welcome_message = Mumblr::TextPost.tagged('mumblr_welcome_message').first
+    puts @welcome_message.body # => "Hello there!"
+
+    @updated_message = Mumblr::TextPost.tagged!('mumblr_welcome_message').first
+    puts @updated_message.body # => "Hello there! This was updated!"
+
+Note: Tumblr's API is a bit strange. When fetching posts by tag, only published (ie not private) posts are returned. However, when fetching all posts, private posts will be returned if your OAUTH credentials are provided and Mumblr is configured to include private posts.
+
 == Author
 
 * Peter Compernolle -- http://github.com/thelowlypeon
