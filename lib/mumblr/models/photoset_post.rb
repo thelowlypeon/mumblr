@@ -10,7 +10,14 @@ module Mumblr
       photos = hash['photos']
       hash.delete('photos')
       super
-      photos.each do |photo|
+      self.photos = photos
+    end
+
+    def photos=(arr)
+      if arr.is_a?(String)
+        arr = JSON.parse arr
+      end
+      arr.each do |photo|
         self.photos << Mumblr::Photo.new(photo)
       end
     end

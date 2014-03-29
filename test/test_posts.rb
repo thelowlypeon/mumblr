@@ -14,6 +14,17 @@ class MumblrTest < Test::Unit::TestCase
     Mumblr.blog = @@default_blog
   end
 
+  def test_find_80462639659
+    found = Mumblr::Post.find(80462639659)
+    assert_not_nil found
+    found = Mumblr::Post.where({tumblr_id: 80462639659}).first
+    assert_not_nil found
+    assert_nothing_raised do
+      Mumblr::Post.all
+      Mumblr::Post.all!
+    end
+  end
+
   def test_saved_textpost_found_by_generic_search
     assert_nothing_raised do 
       post = Mumblr::TextPost.new(tumblr_id: 1234)
@@ -160,6 +171,13 @@ class MumblrTest < Test::Unit::TestCase
         count_after = Mumblr::Post.where(tumblr_id: tumblr_id).count
         assert_equal count_before, count_after, "Count before #{count_before} != count after #{count_after}. found: #{found.to_json}"
       end
+    end
+  end
+
+  def test_duplicates_caught_and_updated_instead_of_inserted_with_all
+    Mumblr::Post.all!
+    assert_nothing_raised do
+      Mumblr::Post.all!
     end
   end
 end

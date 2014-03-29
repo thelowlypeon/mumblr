@@ -21,25 +21,22 @@ module Mumblr
     key :total_posts, Integer
     timestamps!
 
-    def initialize(options)
-      if options.has_key?('id')
-        options[:tumblr_id] = options['id']
-        options.delete('id')
-      end
-      super
-    end
-
     def self.new(args)
-      if args.is_a?(Hash) && args.has_key?(:tumblr_id)
-        exists = self.where(tumblr_id: args[:tumblr_id]).first
-        unless exists.nil?
-          args.each do |k,v|
-            exists.send("#{k}=", "#{v}")
+      if args.is_a?(Hash)
+        id = args[:tumblr_id] || args['tumblr_id'] || args[:id] || args['id'] || nil
+        args = args.except(:id, 'id')
+        args[:tumblr_id] = id
+        unless id.nil?
+          exists = self.where(tumblr_id: id).first
+          unless exists.nil?
+            args.each do |k,v|
+              exists.send("#{k}=", v)
+            end
+            return exists
           end
-          return exists
         end
       end
-      super
+      super args
     end
 
     #retrieve post from mongo, fetch from tumblr if not found
