@@ -33,7 +33,7 @@ For Rails, add the following to an initializer:
       config.include_private = true #include private posts when fetching from tumblr (default false)
     end
 
-=== Environment Variable
+=== Environment Variables
 
 Alternatively, you can configure Mumblr using environment variables:
 
