@@ -23,7 +23,7 @@ module Mumblr
 
     def initialize(options)
       if options.has_key?('id')
-        options['tumblr_id'] = options['id']
+        options[:tumblr_id] = options['id']
         options.delete('id')
       end
       super
