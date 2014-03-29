@@ -45,35 +45,40 @@ module Mumblr
     #retrieve post from mongo, fetch from tumblr if not found
     def self.find(tumblr_id, fetch_if_not_found = true)
       options = {tumblr_id: tumblr_id}
-      options['type'] = @type unless @type.blank?
+      options[:type] = @type unless @type.blank?
       post = self.where(options).first
       post.nil? && fetch_if_not_found ? self.find!(tumblr_id) : post
     end
 
     # fetch from tumblr. insert, or update if exists
     def self.find!(tumblr_id)
-      hash = self.fetch_from_tumblr(tumblr_id)
-      return nil if hash.blank?
-      post = self.class_from_type(@type.present? ? @type : hash['type']).new(hash)
-      post.save
-      post
+      posts = self.all!({limit: 1, id: tumblr_id})
+      unless posts.nil?
+        post = posts.first
+        post.save
+        post
+      else
+        nil
+      end
     end
 
     # ALERT: when querying mongo, this should be "tags". tumblr is "tag"
-    def self.tagged(tag)
+    def self.tagged(tag, fetch_if_not_found = true)
       options = {tags: tag}
-      options['type'] = @type unless @type.blank?
-      self.where(options)
-    end
-
-    def self.tagged!(tag)
-      posts = self.tagged(tag)
-      posts.present? ? posts : self.fetch_tagged(tag)
+      options[:type] = @type unless @type.blank?
+      posts = self.where(options)
+      posts.empty? && fetch_if_not_found ? self.tagged!(tag) : posts
     end
 
     # ALERT: when querying tumblr, this should be "tag". mongo is "tags"
-    def self.fetch_tagged(tag)
-      hash = self.fetch_from_tumblr({tag: tag})
+    def self.tagged!(tag, options={})
+      self.all!(options.merge({tag: tag}))
+    end
+
+    # fetch from tumblr and cache in mongo
+    def self.all!(options={})
+      options[:type] = @type unless @type.blank?
+      hash = self.fetch_from_tumblr(options)
       return nil if hash.blank?
       posts = []
       hash.each do |post_hash|
@@ -84,64 +89,64 @@ module Mumblr
       posts
     end
 
+    # return a single post chosen randomly
     def self.random(options={})
-      options['type'] = @type unless @type.blank?
+      options[:type] = @type unless @type.blank?
       collection = self.where(options)
       collection.first(limit: 1, offset: rand(collection.count))
     end
 
-    # Fetch raw JSON data from tumblr. If parameter is
-    #   an integer, returns a single hash, else returns
-    #   an array of all records returned from Tumblr.
-    #   Options can be any accepted by tumblr_client gem.
-    #
-    #   If no response from Tumblr, Exception is raised
-    #
-    #   Post.fetch_from_tumblr(limit: 10, type: "text") # => [{id: 12345, title: "Here is the title", ...}, {id: 12346, ...}]
-    #   Post.fetch_from_tumblr(12345) # => {id: 12345, title: "Here is the title", ...}
-    def self.fetch_from_tumblr(options={limit: 20})
-      filter_by_blog = true
-      return_single = false
-      if options.is_a?(Integer)
-        options = {id: options, limit: 1}
-        options['type'] = @type if @type.present?
-        return_single = true
-      end
-      options['type'] = @type unless @type.blank?
-      response = Mumblr.request_from_tumblr(options)
-      self.filter_tumblr_response response, {filter_by_blog: filter_by_blog, return_single: return_single}
-    end
+    private
 
-    def self.filter_tumblr_response(response, options={})
-      unless response.nil? || response['posts'].blank?
-        filter_by_blog = options.has_key?(:filter_by_blog) ? options[:filter_by_blog] : true
-        return_single  = options.has_key?(:return_single) ? options[:return_single] : false
-
-        posts = []
-        response['posts'].each do |post|
-          if (!filter_by_blog || post['blog_name'] == Mumblr.blog) && (Mumblr.configuration.include_private || post['state'] != 'private')
-            posts << post #unless filter_by_blog && post['blog_name'] != Mumblr.blog
-          end
+      # Fetch raw JSON data from tumblr. If parameter is
+      #   an integer, returns a single hash, else returns
+      #   an array of all records returned from Tumblr.
+      #   Options can be any accepted by tumblr_client gem.
+      #
+      #   If no response from Tumblr, Exception is raised
+      #
+      #   Post.fetch_from_tumblr(limit: 10, type: "text") # => [{id: 12345, title: "Here is the title", ...}, {id: 12346, ...}]
+      #   Post.fetch_from_tumblr(12345) # => {id: 12345, title: "Here is the title", ...}
+      def self.fetch_from_tumblr(options={limit: 20})
+        if options.is_a?(Integer)
+          options = {id: options, limit: 1}
+          options[:return_single] = true
         end
-        return return_single ? posts.first : posts
+        options = {filter_by_blog: true}.merge(options)
+        options[:type] = @type if @type.present?
+        response = Mumblr.request_from_tumblr(options)
+        self.filter_tumblr_response response, options
       end
-      raise Exception, "Invalid response from Tumblr: " + response.to_json
-    end
 
-    # For a given Tumblr post "type", return the class of the 
-    #  appropriate child of Post.
-    #
-    # new_object = Post.instance_from_type("link") # => LinkPost
-    # new_object = Post.instance_from_type("photo") # => PhotosetPost
-    def self.class_from_type(type)
-      if ['text', 'link', 'quote', 'chat', 'video'].include?(type)
-        classname = type.camelize + 'Post'
-      elsif type == 'photo'
-        classname = 'PhotosetPost'
-      else
-        raise ArgumentError, "Tying to construct a Tumblr post from unsupported type '#{type}'"
+      def self.filter_tumblr_response(response, options={})
+        #puts response.to_json
+        unless response.nil? || response['posts'].blank?
+          options = {fliter_by_blog: true, return_single: false}.merge(options)
+          posts = []
+          response['posts'].each do |post|
+            if (!options[:filter_by_blog] || post['blog_name'] == Mumblr.blog) && (Mumblr.configuration.include_private || post['state'] != 'private')
+              posts << post unless options[:filter_by_blog] && post['blog_name'] != Mumblr.blog
+            end
+          end
+          return options[:return_single] ? posts.first : posts
+        end
+        raise Exception, "Invalid response from Tumblr: " + response.to_json
       end
-      Mumblr.const_get(classname)
+
+      # For a given Tumblr post "type", return the class of the 
+      #  appropriate child of Post.
+      #
+      # new_object = Post.instance_from_type("link") # => LinkPost
+      # new_object = Post.instance_from_type("photo") # => PhotosetPost
+      def self.class_from_type(type)
+        if ['text', 'link', 'quote', 'chat', 'video'].include?(type)
+          classname = type.camelize + 'Post'
+        elsif type == 'photo'
+          classname = 'PhotosetPost'
+        else
+          raise ArgumentError, "Tying to construct a Tumblr post from unsupported type '#{type}'"
+        end
+        Mumblr.const_get(classname)
+      end
     end
-  end
 end
