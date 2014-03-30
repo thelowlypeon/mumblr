@@ -46,6 +46,9 @@ module Mumblr
       ::MongoMapper.database = url.path.gsub(/^\//, '')
       ::MongoMapper.database.authenticate(url.user, url.password) if url.user && url.password
       Mumblr::Post.ensure_index [[:tumblr_id, 1]], :unique => true #TODO: why must this be here?
+      Mumblr::Post.ensure_index [[:blog_name, 1]]
+      Mumblr::Post.ensure_index [[:timestamp, 1]]
+      Mumblr::Post.ensure_index [[:tags, 1]]
     end
 
     def default_blog=(blog)
