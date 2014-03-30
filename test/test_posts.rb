@@ -27,7 +27,7 @@ class MumblrTest < Test::Unit::TestCase
 
   def test_saved_textpost_found_by_generic_search
     assert_nothing_raised do 
-      post = Mumblr::TextPost.new(tumblr_id: 1234)
+      post = Mumblr::TextPost.new(tumblr_id: 1234, blog_name: @@default_blog)
       post.save
     end
     found = Mumblr::Post.find(1234, false)
@@ -36,7 +36,7 @@ class MumblrTest < Test::Unit::TestCase
   end
 
   def test_saved_textpost_is_textpost
-    post = Mumblr::TextPost.new(tumblr_id: 1234)
+    post = Mumblr::TextPost.new(tumblr_id: 1234, blog_name: @@default_blog)
     post.save
 
     found = Mumblr::Post.find(1234, false)

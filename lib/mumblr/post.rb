@@ -43,6 +43,7 @@ module Mumblr
     def self.find(tumblr_id, fetch_if_not_found = true)
       options = {tumblr_id: tumblr_id}
       options[:type] = @type unless @type.blank?
+      options[:blog_name] = Mumblr.blog unless Mumblr.blog.blank?
       post = self.where(options).first
       post.nil? && fetch_if_not_found ? self.find!(tumblr_id) : post
     end
@@ -63,6 +64,7 @@ module Mumblr
     def self.tagged(tag, fetch_if_not_found = true)
       options = {tags: tag}
       options[:type] = @type unless @type.blank?
+      options[:blog_name] = Mumblr.blog unless Mumblr.blog.blank?
       posts = self.where(options)
       posts.empty? && fetch_if_not_found ? self.tagged!(tag) : posts
     end
@@ -87,6 +89,11 @@ module Mumblr
         posts << post
       end
       posts
+    end
+
+    def self.all
+      self.where(blog_name: Mumblr.blog) unless Mumblr.blog.empty?
+      super
     end
 
     # return a single post chosen randomly
