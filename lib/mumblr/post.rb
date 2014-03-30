@@ -91,14 +91,15 @@ module Mumblr
       posts
     end
 
-    def self.all
+    def self.all(*args)
       self.where(blog_name: Mumblr.blog) unless Mumblr.blog.empty?
-      super
+      super args
     end
 
     # return a single post chosen randomly
     def self.random(options={})
       options[:type] = @type unless @type.blank?
+      options[:blog_name] = Mumblr.blog unless Mumblr.blog.blank?
       collection = self.where(options)
       collection.first(limit: 1, offset: rand(collection.count))
     end
