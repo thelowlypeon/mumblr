@@ -24,8 +24,10 @@ module Mumblr
     def self.new(args)
       if args.is_a?(Hash)
         id = args[:tumblr_id] || args['tumblr_id'] || args[:id] || args['id'] || nil
-        args = args.except(:id, 'id')
+        blog_name = args[:blog_name] || args['blog_name'] || Mumblr.blog
+        args = args.except(:id, 'id', :blog_name, 'blog_name')
         args[:tumblr_id] = id
+        args[:blog_name] = blog_name
         unless id.nil?
           exists = self.where(tumblr_id: id).first
           unless exists.nil?
@@ -91,9 +93,9 @@ module Mumblr
       posts
     end
 
-    def self.all(*args)
+    def self.all(options={})
       self.where(blog_name: Mumblr.blog) unless Mumblr.blog.empty?
-      super args
+      super options
     end
 
     # return a single post chosen randomly
