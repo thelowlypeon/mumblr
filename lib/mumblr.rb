@@ -6,7 +6,7 @@ Dir[File.dirname(__FILE__) + '/mumblr/models/*.rb'].each {|file| require file }
 
 module Mumblr
   class << self
-    @blog
+    attr_accessor :blog
 
     def blog
       @blog ||= @configuration.default_blog
