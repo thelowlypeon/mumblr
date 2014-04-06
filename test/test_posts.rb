@@ -131,6 +131,26 @@ class MumblrTest < Test::Unit::TestCase
     assert_not_nil photoset.photos[0].alt_sizes[0]['url']
   end
 
+  def test_photo_filename
+    Mumblr.blog = 'thelowlypeon'
+    photoset = Mumblr::PhotosetPost.find(76743812654, true)
+    photo = photoset.photos.first
+    fake_data = {'alt_sizes' => [{'width' => 1, 'height' => 1, 'url' => photo.alt_sizes.first['url']}]}
+
+    assert_equal Mumblr::Photo.filename_from_data(fake_data), photo.alt_sizes.first['url']
+  end
+
+  def test_photos_not_duplicated
+    Mumblr.blog = 'thelowlypeon'
+    photoset = Mumblr::PhotosetPost.find!(76743812654)
+    initial_count = photoset.photos.count
+    photoset2 = Mumblr::PhotosetPost.find!(76743812654)
+    second_count = photoset2.photos.count
+
+    assert_equal initial_count, second_count
+
+  end
+
   def test_query_by_tags
     post = Mumblr::Post.find(67719574870, true)
     post.tags.each do |tag|
