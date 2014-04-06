@@ -82,6 +82,7 @@ module Mumblr
     # fetch from tumblr and cache in mongo
     def self.all!(options={})
       options[:type] = @type unless @type.blank?
+      options[:blog_name] = Mumblr.blog unless Mumblr.blog.empty?
       hash = self.fetch_from_tumblr(options)
       return nil if hash.blank?
       posts = []
