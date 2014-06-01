@@ -4,6 +4,8 @@ Mongo + Tumblr = Awesome.
 
 Fetch any content you want from Tumblr, store it locally in MongoDB, and keep things up to date.
 
+Tested with Ruby > 2.0
+
 == Installation
 
 Add Mumblr to your Gemfile:
