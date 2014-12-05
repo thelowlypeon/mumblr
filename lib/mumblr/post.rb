@@ -32,7 +32,7 @@ module Mumblr
           exists = self.where(tumblr_id: id).first
           unless exists.nil?
             args.each do |k,v|
-              exists.send("#{k}=", v)
+              exists.send("#{k}=", v) unless !exists.respond_to?("#{k}=")
             end
             return exists
           end
